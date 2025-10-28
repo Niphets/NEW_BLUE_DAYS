@@ -1,8 +1,15 @@
 import { useState } from "react";
-import { Eye, ArrowUpRight } from "lucide-react";
+import { Eye, ArrowUpRight, X } from "lucide-react";
 
 export default function Portfolio() {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [activeItem, setActiveItem] = useState<{
+    id: number;
+    title: string;
+    category: string;
+    image: string;
+    description: string;
+  } | null>(null);
 
   const categories = [
     { id: "all", label: "All Events" },
@@ -96,6 +103,7 @@ export default function Portfolio() {
           {filteredItems.map((item, index) => (
             <div
               key={item.id}
+              onClick={() => setActiveItem(item)}
               className="group relative overflow-hidden rounded-xl border border-border bg-card h-64 cursor-pointer transition-all duration-300 hover:shadow-2xl hover:border-primary/50 animate-fade-in"
               style={{
                 animationDelay: `${index * 50}ms`,
@@ -114,11 +122,18 @@ export default function Portfolio() {
                 <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
                 <p className="text-white/80 text-sm mb-4">{item.description}</p>
 
-                <div className="flex items-center gap-2 text-accent font-semibold group-hover:translate-x-1 transition-transform">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveItem(item);
+                  }}
+                  className="inline-flex items-center gap-2 text-accent font-semibold group-hover:translate-x-1 transition-transform hover:underline"
+                >
                   <Eye className="w-4 h-4" />
                   View Details
                   <ArrowUpRight className="w-4 h-4" />
-                </div>
+                </button>
               </div>
 
               {/* Category badge */}
@@ -128,6 +143,49 @@ export default function Portfolio() {
             </div>
           ))}
         </div>
+
+        {/* Details Modal */}
+        {activeItem && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+            onClick={() => setActiveItem(null)}
+          >
+            <div
+              className="relative w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                aria-label="Close"
+                className="absolute top-3 right-3 p-2 rounded-full hover:bg-muted/40 text-foreground"
+                onClick={() => setActiveItem(null)}
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="p-6 sm:p-8">
+                <div className="text-6xl mb-4 text-center">{activeItem.image}</div>
+                <h3 className="text-2xl font-bold text-foreground mb-2 text-center">{activeItem.title}</h3>
+                <div className="text-sm text-muted-foreground text-center mb-4">
+                  {activeItem.category.charAt(0).toUpperCase() + activeItem.category.slice(1)}
+                </div>
+                <p className="text-muted-foreground leading-relaxed text-center mb-6">
+                  {activeItem.description}
+                </p>
+                <div className="flex justify-center">
+                  <button
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-all"
+                    onClick={() => {
+                      setActiveItem(null);
+                      const el = document.querySelector('#contact');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    Book a Consultation
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Call to action */}
         <div className="mt-16 text-center">

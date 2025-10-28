@@ -26,8 +26,33 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      // Simulate form submission
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const waNumber = (import.meta.env.VITE_WHATSAPP_NUMBER as string | undefined)?.replace(/[^\d]/g, "");
+      if (waNumber) {
+        const lines = [
+          `New enquiry from ${formData.name}`,
+          formData.email ? `Email: ${formData.email}` : undefined,
+          formData.phone ? `Phone: ${formData.phone}` : undefined,
+          formData.eventDate ? `Event Date: ${formData.eventDate}` : undefined,
+          formData.eventType ? `Event Type: ${formData.eventType}` : undefined,
+          formData.message ? `Message: ${formData.message}` : undefined,
+        ].filter(Boolean) as string[];
+        const text = encodeURIComponent(lines.join("\n"));
+        const waUrl = `https://wa.me/${waNumber}?text=${text}`;
+        window.open(waUrl, "_blank");
+      } else {
+        const endpoint = import.meta.env.VITE_CONTACT_ENDPOINT as string | undefined;
+        if (endpoint) {
+          const resp = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          });
+          if (!resp.ok) throw new Error(`Request failed: ${resp.status}`);
+        } else {
+          // Fallback: simulate form submission
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+      }
       toast.success("Thank you! We'll be in touch shortly.");
       setFormData({
         name: "",
@@ -48,17 +73,17 @@ export default function Contact() {
     {
       icon: Phone,
       label: "Phone",
-      value: "+1 (555) 123-4567",
+      value: "9715042917" +" 6385642082",
     },
     {
       icon: Mail,
       label: "Email",
-      value: "info@eventelegance.com",
+      value: "bluedays@gmail.com",
     },
     {
       icon: MapPin,
       label: "Location",
-      value: "123 Event Street, City, Country",
+      value: "Athencode, Padanthalmoodu, India",
     },
   ];
 
@@ -84,7 +109,27 @@ export default function Contact() {
                   <Icon className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <h3 className="font-bold text-foreground mb-2">{info.label}</h3>
-                <p className="text-muted-foreground">{info.value}</p>
+                {info.label === "Phone" ? (
+                  <div className="space-y-1">
+                    {(
+                      Array.isArray(info.value)
+                        ? info.value
+                        : String(info.value)
+                            .split(/[\s,]+/)
+                            .filter(Boolean)
+                    ).map((num, i) => (
+                      <a
+                        key={i}
+                        href={`tel:${String(num).replace(/[^+\d]/g, "")}`}
+                        className="block text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        {num}
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">{info.value}</p>
+                )}
               </div>
             );
           })}

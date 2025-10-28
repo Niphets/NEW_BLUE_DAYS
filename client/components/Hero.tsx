@@ -1,6 +1,12 @@
 import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
+  const scrollToSection = (href: string) => {
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
   return (
     <section id="home" className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background gradient */}
@@ -24,11 +30,11 @@ export default function Hero() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-lg font-bold text-lg transition-all hover:shadow-2xl flex items-center justify-center gap-2 group">
+              <button onClick={() => scrollToSection("#contact")} className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-lg font-bold text-lg transition-all hover:shadow-2xl flex items-center justify-center gap-2 group">
                 Book Free Consultation
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="border-2 border-primary text-primary hover:bg-primary/5 px-8 py-4 rounded-lg font-bold text-lg transition-all">
+              <button onClick={() => scrollToSection("#portfolio")} className="border-2 border-primary text-primary hover:bg-primary/5 px-8 py-4 rounded-lg font-bold text-lg transition-all">
                 View Our Work
               </button>
             </div>
