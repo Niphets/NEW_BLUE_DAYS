@@ -21,39 +21,31 @@ export default function Contact() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+  
     try {
-      const waNumber = (import.meta.env.VITE_WHATSAPP_NUMBER as string | undefined)?.replace(/[^\d]/g, "");
-      if (waNumber) {
-        const lines = [
-          `New enquiry from ${formData.name}`,
-          formData.email ? `Email: ${formData.email}` : undefined,
-          formData.phone ? `Phone: ${formData.phone}` : undefined,
-          formData.eventDate ? `Event Date: ${formData.eventDate}` : undefined,
-          formData.eventType ? `Event Type: ${formData.eventType}` : undefined,
-          formData.message ? `Message: ${formData.message}` : undefined,
-        ].filter(Boolean) as string[];
-        const text = encodeURIComponent(lines.join("\n"));
-        const waUrl = `https://wa.me/${waNumber}?text=${text}`;
-        window.open(waUrl, "_blank");
-      } else {
-        const endpoint = import.meta.env.VITE_CONTACT_ENDPOINT as string | undefined;
-        if (endpoint) {
-          const resp = await fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-          });
-          if (!resp.ok) throw new Error(`Request failed: ${resp.status}`);
-        } else {
-          // Fallback: simulate form submission
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      }
-      toast.success("Thank you! We'll be in touch shortly.");
+      const lines = [
+        `New enquiry from ${formData.name}`,
+        formData.email ? `Email: ${formData.email}` : undefined,
+        formData.phone ? `Phone: ${formData.phone}` : undefined,
+        formData.eventDate ? `Event Date: ${formData.eventDate}` : undefined,
+        formData.eventType ? `Event Type: ${formData.eventType}` : undefined,
+        formData.message ? `Message: ${formData.message}` : undefined,
+      ].filter(Boolean);
+  
+      const text = encodeURIComponent(lines.join("\n"));
+  
+      // ✅ Send same message to two WhatsApp numbers
+      const numbers = ["919715042917", "916385642082"];
+      numbers.forEach((num, i) => {
+        setTimeout(() => {
+          window.open(`https://wa.me/${num}?text=${text}`, "_blank");
+        }, i * 1000);
+      });
+  
+      toast.success("Message sent successfully!");
       setFormData({
         name: "",
         email: "",
@@ -68,12 +60,14 @@ export default function Contact() {
       setIsSubmitting(false);
     }
   };
+  
+  
 
   const contactInfo = [
     {
       icon: Phone,
       label: "Phone",
-      value: "9715042917" +" 6385642082",
+      value: "9715042917 6385642082",
     },
     {
       icon: Mail,
@@ -88,7 +82,10 @@ export default function Contact() {
   ];
 
   return (
-    <section id="contact" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-background to-primary/5">
+    <section
+      id="contact"
+      className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-background to-primary/5"
+    >
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -104,28 +101,28 @@ export default function Contact() {
           {contactInfo.map((info, index) => {
             const Icon = info.icon;
             return (
-              <div key={index} className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow text-center">
+              <div
+                key={index}
+                className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow text-center"
+              >
                 <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Icon className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <h3 className="font-bold text-foreground mb-2">{info.label}</h3>
                 {info.label === "Phone" ? (
                   <div className="space-y-1">
-                    {(
-                      Array.isArray(info.value)
-                        ? info.value
-                        : String(info.value)
-                            .split(/[\s,]+/)
-                            .filter(Boolean)
-                    ).map((num, i) => (
-                      <a
-                        key={i}
-                        href={`tel:${String(num).replace(/[^+\d]/g, "")}`}
-                        className="block text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        {num}
-                      </a>
-                    ))}
+                    {String(info.value)
+                      .split(/[\s,]+/)
+                      .filter(Boolean)
+                      .map((num, i) => (
+                        <a
+                          key={i}
+                          href={`tel:${String(num).replace(/[^+\d]/g, "")}`}
+                          className="block text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          {num}
+                        </a>
+                      ))}
                   </div>
                 ) : (
                   <p className="text-muted-foreground">{info.value}</p>
@@ -251,7 +248,6 @@ export default function Contact() {
             </div>
           </form>
 
-          {/* Form Note */}
           <p className="text-center text-sm text-muted-foreground mt-6">
             We'll get back to you within 24 hours with available consultation times.
           </p>
